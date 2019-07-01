@@ -30,6 +30,7 @@ definition(
 
 mappings {
   path("/device/:mac/:id/:deviceState") { action: [ PUT: "childDeviceStateUpdate"] }
+  path("/device/:mac/:id/:deviceState") { action: [ PUT: "childDeviceStateUpdate"] }
   path("/device/:mac") { action: [ PUT: "childDeviceStateUpdate", GET: "getDeviceState" ] }
   path("/ping") { action: [ GET: "devicePing"] }
 }
@@ -40,6 +41,26 @@ preferences {
   page(name: "pageConfiguration")
   page(name: "pageSelectHwType")
 }
+
+def device0 = {
+    device.networkAddress = "192.168.170.80"
+    device.deviceAddress = "11210"
+    device.modelName = "2.2.7"
+    device.serialNumber = "3210762"
+    device.hwType = "Konnected"
+    device.url = "http://192.168.170.80:11210"
+    parent.registerKnownDevice(state.device.mac)
+    }
+    
+def device1 = {
+    device.networkAddress = "192.168.170.81"
+    device.deviceAddress = "11211"
+    device.modelName = "2.2.7"
+    device.serialNumber = "3211016"
+    device.hwType = "Konnected"
+    device.url = "http://192.168.170.81:11211"
+    parent.registerKnownDevice(state.device.mac)
+    }
 
 def installed() {
   log.info "installed(): Installing Konnected Device: " + state.device?.mac
@@ -101,6 +122,26 @@ def pageWelcome() {
   def device = state.device
   dynamicPage( name: "pageWelcome", title: deviceName(), nextPage: "pageConfiguration") {
     section() {
+  def device0 = { 
+      href(
+          name:        "device_11210",
+          image:       "https://docs.konnected.io/assets/favicons/apple-touch-icon.png",
+          title:       "Device status",
+          description: "192.168.170.80:11210",
+          url:         "http://192.168.170.80:11210"
+          )
+      }
+
+  def device1 = { 
+      href(
+          name:        "device_11211",
+          image:       "https://docs.konnected.io/assets/favicons/apple-touch-icon.png",
+          title:       "Device status",
+          description: "192.168.170.80:11211",
+          url:         "http://192.168.170.80:11211"
+          )
+      }
+          
       if (device) {
         href(
           name:        "device_" + device.mac,
@@ -154,7 +195,7 @@ def pageDiscovery() {
       }
     } else {
       section("Please wait while we discover your device") {
-        paragraph "This may take up to a minute."
+        paragraph "This may take up to a month. ;)"
       }
     }
   }
@@ -301,6 +342,8 @@ def discoverySearchHandler(evt) {
     discoveryVerify(event)
   }
 }
+
+
 
 // Device Discovery : Verify a Device
 def discoveryVerify(Map device) {

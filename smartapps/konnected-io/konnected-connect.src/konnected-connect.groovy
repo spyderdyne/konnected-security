@@ -52,6 +52,7 @@ def uninstalled() {
 }
 
 def initialize() {
+  
   runEvery5Minutes(discoverySearch)
 }
 
@@ -67,9 +68,8 @@ def discoveryDeviceType() {
 
 void registerKnownDevice(mac) {
   if (state.knownDevices == null) {
-    state.knownDevices = [].toSet()
-  }
-
+    state.knownDevices = [].toSet() 
+    }
   if (isNewDevice(mac)) {
     log.debug "Registering Konnected device ${mac}"
   	state.knownDevices.add(mac)
