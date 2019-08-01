@@ -14,7 +14,7 @@
  *
  */
 metadata {
-  definition (name: "Konnected Motion Sensor", namespace: "konnected-io", author: "konnected.io", mnmn: "SmartThings", vid:"generic-motion") {
+  definition (name: "Konnected Break Glass Sensor", namespace: "konnected-io", author: "konnected.io", mnmn: "SmartThings", vid:"generic-motion") {
     capability "Motion Sensor"
     capability "Sensor"
   }
@@ -22,7 +22,7 @@ metadata {
   preferences {
     input name: "normalState", type: "enum", title: "Normal State",
       options: ["Normally Closed", "Normally Open"],
-      defaultValue: "Normally Closed",
+      defaultValue: "Normally Open",
       description: "Most motion sensors are Normally Closed (NC), meaning that the circuit opens when motion is detected. To reverse this logic, select Normally Open (NO)."
   }
 
