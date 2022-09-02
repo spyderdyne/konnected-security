@@ -7,7 +7,7 @@ function usage() {
     echo '    version should be formatted <major>-<minor>-<patch>'
     echo
     echo 'Execute from the root dir of the repo.'
-    echo "    ex: '$0 2-3-0 /dev/ttyS5'"
+    echo "    ex: '$0 3-0-1 /dev/cu.SLAB_USBtoUART '"
     exit 1
 }
 if [ "$#" == 0 ]; then
@@ -15,13 +15,8 @@ if [ "$#" == 0 ]; then
 fi
 
 VERSION="$1"
-if ! [[ "${VERSION}" =~ ^[0-9]+-[0-9]+-[0-9]+ ]] ; then
-    echo "Version not formatted correctly..."
-    usage
-fi
-
 PORT=${2:-/dev/cu.wchusbserial1410}
-BUILD_PATH="firmware/builds/${VERSION}"
+BUILD_PATH=build
 
 if [ ! -d "${BUILD_PATH}" ] ; then
     echo "No matching build version - trying releases"

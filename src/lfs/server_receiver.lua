@@ -17,8 +17,8 @@ local function httpReceiver(sck, payload)
   end
   collectgarbage()
 
-  local request = require("httpd_req")(payload)
-  local response = require("httpd_res")()
+  request = require("httpd_req")(payload)
+  response = require("httpd_res")()
 
   if request.method == 'OPTIONS' then
     print("Heap: ", node.heap(), "HTTP: ", "Options")
@@ -26,10 +26,8 @@ local function httpReceiver(sck, payload)
       "Access-Control-Allow-Methods: POST, GET, PUT, OPTIONS\r\n",
       "Access-Control-Allow-Headers: Content-Type\r\n"
     }))
-    return
-  end
 
-  if request.path == "/" then
+  elseif request.path == "/" then
     print("Heap: ", node.heap(), "HTTP: ", "Index")
     response.file(sck, "http_index.html")
 
@@ -42,7 +40,15 @@ local function httpReceiver(sck, payload)
 
   elseif request.path == "/settings" then
     print("Heap: ", node.heap(), "HTTP: ", "Settings")
-    response.text(sck, require("server_settings")(request))
+    if mqttC ~= nil  and request.method ~= "GET" then
+      mqttC:on("offline", function(client)
+        response.text(sck, require("server_settings")(request))
+      end)
+      mqttC:close()
+      return
+    else
+      response.text(sck, require("server_settings")(request))
+    end
 
   elseif request.path == "/device" then
     print("Heap: ", node.heap(), "HTTP: ", "Device")
@@ -58,7 +64,17 @@ local function httpReceiver(sck, payload)
 
   elseif request.path == "/ota" then
     print("Heap: ", node.heap(), "HTTP: ", "OTA Update")
-    response.text(sck, require("ota")(request))
+    if mqttC ~= nil  and request.method ~= "GET" then
+        local uri = request.body.uri
+        local host, path, filename = string.match(uri, "%w+://([^/]+)(/[%w%p]+/)(.*)")
+        local f = file.open("ota_update.lua", "w")
+        f.writeline("return function() return " .. "'"..host.."'," .. "'"..path.."'," .. "'"..filename.."'" .. " end")
+        f.close()
+        response.text(sck, '{ "status":"ok", "host":"'.. host ..'", "path":"'.. path ..'", "filename":"'.. filename ..'" }')
+        tmr.create():alarm(1000, tmr.ALARM_SINGLE, function() print("Restarting for update") node.restart() end)
+    else
+      response.text(sck, require("ota")(request))
+    end
   end
 
   sck, request, response = nil

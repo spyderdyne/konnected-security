@@ -48,3 +48,9 @@ firmware/builds
 
 # Private files
 private
+
+# NodeMCU
+nodemcu-firmware
+
+# IDE's
+.vscode

@@ -29,11 +29,18 @@ if wifi.sta.getconfig() == "" then
 end
 
 local bootApp = function()
-  print("Heap: ", node.heap(), "Booting Konnected application")
-  require("server")
-  print("Heap: ", node.heap(), "Loaded: ", "server")
-  require("application")
-  print("Heap: ", node.heap(), "Loaded: ", "application")
+  if file.exists("ota_update.lua") then
+    print("Performing OTA update...")
+    local host, path, filename = require("ota_update")()
+    file.remove("ota_update.lua")
+    LFS.http_ota(host, path, filename)
+  else
+    print("Heap: ", node.heap(), "Booting Konnected application")
+    require("server")
+    print("Heap: ", node.heap(), "Loaded: ", "server")
+    require("application")
+    print("Heap: ", node.heap(), "Loaded: ", "application")
+  end
 end
 
 local _ = tmr.create():alarm(900, tmr.ALARM_AUTO, function(t)
@@ -62,8 +69,8 @@ local _ = tmr.create():alarm(900, tmr.ALARM_AUTO, function(t)
             tm["year"], tm["mon"], tm["day"], tm["hour"], tm["min"], tm["sec"]))
         bootApp()
       end,
-      function()
-        print("Heap: ", node.heap(), "Time sync failed!")
+      function(code, err)
+        print("Heap: ", node.heap(), "Time sync failed!", "Code: ", code, err)
         bootApp()
       end)
   end
